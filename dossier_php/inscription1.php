@@ -17,19 +17,16 @@
          $ville = htmlspecialchars($_POST['ville']); 
          $code_postal = htmlspecialchars($_POST['code_postal']); 
          $adresse = htmlspecialchars($_POST['adresse']);
-            // La fonction hash permet de traiter le mot de passe
-         $motdepasse = password_hash($_POST['motdepasse'], PASSWORD_DEFAULT);
-         $motdepasse2 = password_hash($_POST['motdepasse2'], PASSWORD_DEFAULT);
-
 
         // Vérification des champs ( Si aucun champs n'est vide, on fait le traitement) 
 
         if(!empty($_POST['nom']) AND !empty($_POST['prenom']) AND !empty($_POST['type_etablissement']) AND
         !empty($_POST['num_siret']) AND !empty($_POST['email']) AND !empty($_POST['ville']) AND
-        !empty($_POST['code_postal']) AND !empty($_POST['adresse']) AND $_POST['motdepasse'] == 
-        $_POST['motdepasse2'])
+        !empty($_POST['code_postal']) AND !empty($_POST['adresse']) AND htmlspecialchars($_POST['motdepasse']) 
+        == htmlspecialchars($_POST['motdepasse2']))
         {
-        
+                       
+            
         //vérification que le mail existe avant insertion dans la base de donnée 
 
           
@@ -40,11 +37,25 @@
             // email existe
             echo " L'email ou le mot de passe existe déjà . ";
             } else {
-                /* Faire une requête qui va interroger la base de donnée. On fait une requete préparer
-            elle permet de préparer les requetes mais de ne pas les exécuter */
-            $insertion = $bdd-> prepare('INSERT INTO compte(email, motdepasse, num_siret) 
-            values(:mail, :motdepasse, :num_siret)');
 
+            // La fonction hash permet de traiter le mot de passe
+            $motdepasse = password_hash($_POST['motdepasse'], PASSWORD_DEFAULT);
+
+            /* Faire une requête qui va interroger la base de donnée. On fait une requete préparer
+            elle permet de préparer les requetes mais de ne pas les exécuter */
+            $insertion = $bdd-> prepare('INSERT INTO compte(nom, prenom, email, motdepasse, 
+            num_siret, type_etablissement, ville, adresse) values(:nom, :prenom, :mail, :motdepasse, 
+            :num_siret, :type_etablissement, :ville, :adresse)');
+
+            $insertion->execute(Array('nom' => $nom, 'prenom' => $prenom, 'mail'=> $mail,'motdepasse'=>
+            $motdepasse,'num_siret'=>$num_siret,'type_etablissement'=>$type_etablissement, 
+            'ville'=>$ville, 'adresse'=>$adresse)); 
+
+            header('Location: espace.php');
+            
+            
+
+            $insertion->close_cursor();
             // bindvalue permet de faire la liaison
             // $insertion->bindvalue(':nom, $nom'); 
             // $insertion->bindvalue(':prenom, $prenom');
@@ -52,15 +63,13 @@
             // $insertion->bindvalue(':ville, $ville');
             // $insertion->bindvalue(':code_postal, $code_postal');
             // $insertion->bindvalue(':adresse, $adresse');
-
+            /*
             $insertion->bindvalue(':mail', $mail);
             $insertion->bindvalue(':motdepasse', $motdepasse);
             $insertion->bindvalue(':num_siret', $num_siret);
 
             
-           
-
-             /*vérification mot de passe */
+             /*vérification mot de passe 
             if ($_POST['motdepasse'] == $_POST['motdepasse2']) {
 
              $insertion->execute();
@@ -71,7 +80,7 @@
             }
                                         
 
-            
+            */
                 
             }
         }    
